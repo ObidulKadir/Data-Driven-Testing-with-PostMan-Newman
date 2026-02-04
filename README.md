@@ -40,7 +40,7 @@ The data-driven testing follows this flow:
 ```bash
 [CSV Data] --> [Auth Request] --> [Save Token] --> [Booking Request] --> [Validate Response]
 ```
-## How to run on Newman
+## How to run an API on Newman
 ## 1. Auth- get token
 ```newman
 newman run "Data Driven Testing.postman_collection.json" -e "DataDrivenTesting.postman_environment.json" -d "authSingleEntries.csv" --folder "auth" --export-environment token_with_env.json
@@ -53,7 +53,7 @@ newman run "Data Driven Testing.postman_collection.json" -e "token_with_env.json
 
 ```
 
-## Report generated
+## How to generate a Report
 ```
 1. JSON file report
 newman run "Data Driven Testing.postman_collection.json" -e "token_with_env.json" -d "SingleUpdateBooking.csv" --folder "booking" --reporters cli,json --reporter-json-export "FullBookingRunReport.json"
