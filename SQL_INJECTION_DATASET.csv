@@ -1,0 +1,31 @@
+username,password
+valid_user,valid_user
+"""""",""""""
+admin,admin
+admin' OR '1'='1,admin' OR '1'='1
+' OR 1=1--,' OR 1=1--
+admin' AND 1=1--,admin' AND 1=1--
+admin' AND 1=2--,admin' AND 1=2--
+admin' OR SLEEP(5)--,admin' OR SLEEP(5)--
+admin'; WAITFOR DELAY '0:0:5'--,admin'; WAITFOR DELAY '0:0:5'--
+'--,'--
+"--
+'#
+admin'--
+<script>alert(1)</script>
+'><script>alert(1)</script>","--
+'#
+admin'--
+<script>alert(1)</script>
+'><script>alert(1)</script>"
+"{""$ne"":null}","{""$ne"":null}"
+"{""$gt"":""""}","{""$gt"":""""}"
+1 OR 1=1,1 OR 1=1
+1' OR '1'='1,1' OR '1'='1
+' OR 'a'='a,' OR 'a'='a
+' UNION SELECT NULL--,' UNION SELECT NULL--
+admin' UNION SELECT NULL--,admin' UNION SELECT NULL--
+' OR EXISTS(SELECT * FROM users)--,' OR EXISTS(SELECT * FROM users)--
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+"'\""<>","'\""<>"
+admin,password123

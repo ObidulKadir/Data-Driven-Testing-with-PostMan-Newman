@@ -1,0 +1,19 @@
+{
+  "_": {
+    "postman_variable_scope": "environment",
+    "postman_exported_at": "2026-02-03T04:08:58.147Z",
+    "postman_exported_using": "Postman/11.83.0"
+  },
+  "id": "8d36369d-a0de-484d-93fe-746f6c7efcb7",
+  "name": "DataDrivenTesting",
+  "values": [
+    {
+      "type": "any",
+      "value": "6c58e2d1441e2b4",
+      "key": "token"
+    }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2026-02-04T10:13:33.510Z",
+  "_postman_exported_using": "Newman/6.2.2"
+}

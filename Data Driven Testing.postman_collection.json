@@ -1,0 +1,478 @@
+{
+  "info": {
+    "_postman_id": "fcdfa681-2e93-4205-b622-31dd4ac1980c",
+    "name": "Data Driven Testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "29107702"
+  },
+  "item": [
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "Auth - CreateToken",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// var jsonBody = pm.response.json();\r",
+                  "// console.log(typeof(jsonBody))\r",
+                  "\r",
+                  "// pm.environment.set(\"token\", jsonBody.token)\r",
+                  "\r",
+                  "// pm.test(\"Token is validate properly.\", ()=>{\r",
+                  "//     pm.expect(jsonBody.token).to.be.eql(pm.environment.get(\"token\"))\r",
+                  "// })\r",
+                  "\r",
+                  "var jsonBody = null;\r",
+                  "var iteration = pm.info.iteration + 1;\r",
+                  "let responseText = pm.response.text();\r",
+                  "\r",
+                  "try{\r",
+                  "    jsonBody = JSON.parse(responseText);\r",
+                  "}catch(e){\r",
+                  "    console.log(\"Response is not a valid JSON\");\r",
+                  "}\r",
+                  "\r",
+                  "// 1. Valid login → token should exist\r",
+                  "if (jsonBody && jsonBody.token) {\r",
+                  "    pm.test(\"Iteration \" + iteration + \" → Valid login (Token generated)\", function () {\r",
+                  "        pm.expect(jsonBody.token).to.not.be.undefined;\r",
+                  "        pm.environment.set(\"token\", jsonBody.token);\r",
+                  "        console.log(jsonBody.token)\r",
+                  "    });\r",
+                  "}\r",
+                  "\r",
+                  "// 2. Invalid login → Bad credentials\r",
+                  "else if (jsonBody && jsonBody.reason === \"Bad credentials\") {\r",
+                  "    pm.test(\"Iteration \" + iteration + \" → Invalid login (Bad credentials)\", function () {\r",
+                  "        pm.expect(jsonBody.reason).to.eql(\"Bad credentials\");\r",
+                  "    });\r",
+                  "}\r",
+                  "\r",
+                  "// 3. Bad request → Non JSON response\r",
+                  "else if (pm.response.code === 400) {\r",
+                  "    pm.test(\"Iteration \" + iteration + \" → Bad request\", function () {\r",
+                  "        pm.expect(pm.response.code).to.eql(400);\r",
+                  "    });\r",
+                  "}\r",
+                  "\r",
+                  "// 4. Other unexpected cases\r",
+                  "else {\r",
+                  "    pm.test(\"Iteration \" + iteration + \" → Unexpected response\", function () {\r",
+                  "        pm.fail(\"Unexpected response: \" + responseText);\r",
+                  "    });\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "// {\r\n//     \"username\" : \"admin\",\r\n//     \"password\" : \"password123\"\r\n// }\r\n\r\n{\r\n    \"username\" : \"{{username}}\",\r\n    \"password\" : \"{{password}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://restful-booker.herokuapp.com/auth",
+              "protocol": "https",
+              "host": [
+                "restful-booker",
+                "herokuapp",
+                "com"
+              ],
+              "path": [
+                "auth"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "booking",
+      "item": [
+        {
+          "name": "Create booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Parse JSON response",
+                  "const json = pm.response.json();",
+                  "console.log(json)",
+                  "",
+                  "pm.environment.set(\"id\", json.bookingid); // store booking id for future requests",
+                  "console.log(\"booking id \"+json.bookingid)",
+                  "",
+                  "// Test status code",
+                  "pm.test(\"Status code is 200 for valid token\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "",
+                  "});",
+                  "",
+                  "// Verify the response time",
+                  "pm.test(\"Response time is less than 200ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(200);",
+                  "});",
+                  "",
+                  "// No authentication errors",
+                  "pm.test(\"No Authentication error\", () => {",
+                  "    pm.expect(pm.response.code).to.not.be.oneOf([401, 403]);",
+                  "});",
+                  "",
+                  "// Verify response body is not null",
+                  "pm.test(\"Response contains expected data\", () => {",
+                  "    pm.expect(json).to.not.be.null;",
+                  "});",
+                  "",
+                  "// Booking ID",
+                  "pm.test(\"Booking ID is present\", function () {",
+                  "    pm.expect(json.bookingid).to.not.be.null;",
+                  "});",
+                  "",
+                  "// First Name",
+                  "pm.test(\"First Name is correct\", function () {",
+                  "    pm.expect(json.booking.firstname).to.eql(pm.iterationData.get(\"firstname\"));",
+                  "});",
+                  "",
+                  "// Last Name",
+                  "pm.test(\"Last Name is correct\", function () {",
+                  "    pm.expect(json.booking.lastname).to.eql(pm.iterationData.get(\"lastname\"));",
+                  "});",
+                  "",
+                  "// Total Price",
+                  "pm.test(\"Total Price is correct\", function () {",
+                  "    pm.expect(json.booking.totalprice).to.eql(pm.iterationData.get(\"totalprice\"));",
+                  "});",
+                  "",
+                  "// Deposit Paid",
+                  "pm.test(\"Deposit Paid is correct\", function () {",
+                  "    const depositePaid = pm.iterationData.get(\"depositpaid\"); // store the csv data in a variable",
+                  "    const expectedDeposit = String(depositePaid).trim().toLowerCase() === 'true'; // convert the string to a boolean",
+                  "",
+                  "    console.log(\"Before convert the csv data type : \"+typeof(depositePaid) + \" value: \" + depositePaid)",
+                  "    console.log(\"After convert the csv data type : \"+typeof(expectedDeposit) + \" value: \" + expectedDeposit)",
+                  "    console.log(\"Response depositePaid data type : \"+typeof(json.booking.depositpaid) + \" value: \" + json.booking.depositpaid)",
+                  "",
+                  "    console.log(",
+                  "            \"CSV raw value 👉 [\" + depositePaid + \"]\",",
+                  "            \"length:\", String(depositePaid).length",
+                  "    );",
+                  "",
+                  "    pm.expect(json.booking.depositpaid).to.eql(expectedDeposit);",
+                  "  ",
+                  "});",
+                  "",
+                  "// Booking Check-in Date",
+                  "pm.test(\"Booking Check-in Date is correct\", function () {",
+                  "    pm.expect(json.booking.bookingdates.checkin).to.eql(pm.iterationData.get(\"checkin\"));",
+                  "});",
+                  "",
+                  "// Booking Check-out Date",
+                  "pm.test(\"Booking Check-out Date is correct\", function () {",
+                  "    pm.expect(json.booking.bookingdates.checkout).to.eql(pm.iterationData.get(\"checkout\"));",
+                  "});",
+                  "",
+                  "// Additional Needs",
+                  "pm.test(\"Additional Needs is correct\", () => {",
+                  "    pm.expect(json.booking.additionalneeds).to.eql(pm.iterationData.get(\"additionalneeds\"));",
+                  "});",
+                  "",
+                  "// Headers",
+                  "pm.test(\"Response has required headers\", () => {",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.eql(\"application/json; charset=utf-8\");",
+                  "    pm.response.to.have.header(\"Date\");",
+                  "});",
+                  "",
+                  "// Authorization check",
+                  "pm.test(\"Authorization is successful\", () => {",
+                  "    const responseToken = pm.environment.get(\"token\");",
+                  "    pm.expect(responseToken).to.not.be.undefined;",
+                  "});",
+                  "",
+                  "",
+                  "// console.log(\"Status:\", pm.response.code);",
+                  "// console.log(\"Raw response:\", pm.response.text());",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// const csvData = {\r",
+                  "//     firstname: pm.iterationData.get(\"First_Name\"),\r",
+                  "//     lastname: pm.iterationData.get(\"Last_Name\"),\r",
+                  "//     totalprice: pm.iterationData.get(\"Total_Price\"),\r",
+                  "//     depositpaid: pm.iterationData.get(\"depositpaid\"),\r",
+                  "//     checkin: pm.iterationData.get(\"checkin_date\"),\r",
+                  "//     checkout: pm.iterationData.get(\"checkOut_date\"),\r",
+                  "//     additionalneeds: pm.iterationData.get(\"Additional_Needs\")\r",
+                  "// };\r",
+                  "\r",
+                  "// console.log(\"pre\"+csvData)\r",
+                  "// pm.environment.set(\"firstname\", csvData.firstname);\r",
+                  "// pm.environment.set(\"lastname\", csvData.lastname);\r",
+                  "// pm.environment.set(\"totalprice\", csvData.totalprice);\r",
+                  "// pm.environment.set(\"depositpaid\", csvData.depositpaid);\r",
+                  "// pm.environment.set(\"checkin\", csvData.checkin);\r",
+                  "// pm.environment.set(\"checkout\", csvData.checkout);\r",
+                  "// pm.environment.set(\"additionalneeds\", csvData.additionalneeds);\r",
+                  "\r",
+                  "console.log(\"Before Booking api execute the Token is : \" + pm.environment.get(\"token\"));\r",
+                  "\r",
+                  "let raw = pm.iterationData.get(\"depositpaid\");\r",
+                  "\r",
+                  "// fallback protection (VERY important for Newman)\r",
+                  "if (raw === undefined || raw === null === \"\") {\r",
+                  "    raw = false;\r",
+                  "}\r",
+                  "\r",
+                  "const depositpaid_bool =\r",
+                  "    String(raw).toLowerCase() === \"true\";\r",
+                  "\r",
+                  "pm.variables.set(\"depositpaid_bool\", depositpaid_bool);\r",
+                  "\r",
+                  "console.log(\"depositpaid_bool =\", depositpaid_bool);\r",
+                  "\r",
+                  "\r",
+                  "console.log(\"Final request body:\");\r",
+                  "console.log(pm.request.body.raw);\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstname\": \"{{firstname}}\",\r\n  \"lastname\": \"{{lastname}}\",\r\n  \"totalprice\": \"{{totalprice}}\",\r\n  \"depositpaid\": {{depositpaid_bool}},\r\n  \"bookingdates\": {\r\n    \"checkin\": \"{{checkin}}\",\r\n    \"checkout\": \"{{checkout}}\"\r\n  },\r\n  \"additionalneeds\": \"{{additionalneeds}}\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://restful-booker.herokuapp.com/booking",
+              "protocol": "https",
+              "host": [
+                "restful-booker",
+                "herokuapp",
+                "com"
+              ],
+              "path": [
+                "booking"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var statusCode = pm.response.code;\r",
+                  "console.log(statusCode);\r",
+                  "\r",
+                  "var jsonBody = pm.response.json(); // parse response JSON\r",
+                  "\r",
+                  "if (statusCode === 200) {\r",
+                  "\r",
+                  "    pm.test(\"Status code is 200\", function () {\r",
+                  "        pm.response.to.have.status(200);\r",
+                  "    });\r",
+                  "\r",
+                  "    pm.test(\"First Name matches iteration data\", function () {\r",
+                  "        pm.expect(jsonBody.firstname).to.eql(pm.iterationData.get(\"update_firstname\"));\r",
+                  "    });\r",
+                  "\r",
+                  "    pm.test(\"Last Name matches iteration data\", function () {\r",
+                  "        pm.expect(jsonBody.lastname).to.eql(pm.iterationData.get(\"update_lastname\"));\r",
+                  "    });\r",
+                  "\r",
+                  "    pm.test(\"Total Price matches iteration data\", function () {\r",
+                  "        pm.expect(jsonBody.totalprice).to.eql(pm.iterationData.get(\"update_totalprice\"));\r",
+                  "    });\r",
+                  "\r",
+                  "    pm.test(\"Deposit Paid matches iteration data\", function () {\r",
+                  "\r",
+                  "        const depositePaid = pm.iterationData.get(\"update_depositpaid\"); // store the csv data in a variable\r",
+                  "        const expectedDeposit = String(depositePaid).trim().toLowerCase() === 'true'; // convert the string to a boolean\r",
+                  "\r",
+                  "        console.log(\"Before convert the csv data type : \"+typeof(depositePaid) + \" value: \" + depositePaid)\r",
+                  "        console.log(\"After convert the csv data type : \"+typeof(expectedDeposit) + \" value: \" + expectedDeposit)\r",
+                  "        console.log(\"Response depositePaid data type : \"+typeof(jsonBody.depositpaid) + \" value: \" + jsonBody.depositpaid)\r",
+                  "\r",
+                  "        console.log(\r",
+                  "                \"CSV raw value 👉 [\" + depositePaid + \"]\",\r",
+                  "                \"length:\", String(depositePaid).length\r",
+                  "        );\r",
+                  "\r",
+                  "        pm.expect(jsonBody.depositpaid).to.eql(expectedDeposit);\r",
+                  "    \r",
+                  "    });\r",
+                  "\r",
+                  "    pm.test(\"Check-in date matches iteration data\", function () {\r",
+                  "        pm.expect(jsonBody.bookingdates.checkin).to.eql(pm.iterationData.get(\"update_checkin\"));\r",
+                  "    });\r",
+                  "\r",
+                  "    pm.test(\"Check-out date matches iteration data\", function () {\r",
+                  "        pm.expect(jsonBody.bookingdates.checkout).to.eql(pm.iterationData.get(\"update_checkout\"));\r",
+                  "    });\r",
+                  "\r",
+                  "    pm.test(\"Additional Needs matches iteration data\", function () {\r",
+                  "        pm.expect(jsonBody.additionalneeds).to.eql(pm.iterationData.get(\"update_additionalneeds\"));\r",
+                  "    });\r",
+                  "\r",
+                  "} else {\r",
+                  "    pm.test(\"Status code is \" + statusCode, function () {\r",
+                  "        pm.response.to.have.status(statusCode);\r",
+                  "    });\r",
+                  "}\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// var firsname = pm.variables.replaceIn('{{$randomFirstName}}');\r",
+                  "// console.log(\"first name:\"+firsname)\r",
+                  "// pm.environment.set(\"First_Name\", firsname);\r",
+                  "\r",
+                  "// // set random lastname to envrionment.\r",
+                  "\r",
+                  "// var lastname = pm.variables.replaceIn('{{$randomLastName}}');\r",
+                  "// console.log(\"Last name: \"+lastname)\r",
+                  "// pm.environment.set(\"Last_Name\", lastname);\r",
+                  "\r",
+                  "\r",
+                  "console.log(\"Before Booking api execute the Token is : \" + pm.environment.get(\"token\"));\r",
+                  "console.log(\"Booking id: \"+pm.environment.get('id'))\r",
+                  "\r",
+                  "let raw = pm.iterationData.get(\"update_depositpaid\");\r",
+                  "\r",
+                  "// fallback protection (VERY important for Newman)\r",
+                  "if (raw === undefined || raw === null === \"\") {\r",
+                  "    raw = false;\r",
+                  "}\r",
+                  "\r",
+                  "const depositpaid_bool =\r",
+                  "    String(raw).toLowerCase() === \"true\";\r",
+                  "\r",
+                  "pm.variables.set(\"depositpaid_bool\", depositpaid_bool);\r",
+                  "\r",
+                  "console.log(\"depositpaid_bool =\", depositpaid_bool);\r",
+                  "\r",
+                  "\r",
+                  "console.log(\"Final request body:\");\r",
+                  "console.log(pm.request.body.raw);\r",
+                  "\r",
+                  "console.log(\"Token:\", pm.environment.get(\"token\"));\r",
+                  "console.log(\"BookingId:\", pm.environment.get(\"id\"));\r",
+                  "\r",
+                  "\r",
+                  "if (!pm.environment.get(\"token\")) {\r",
+                  "    \r",
+                  "    throw new Error(\"Token missing! Forbidden will occur.\");\r",
+                  "}\r",
+                  "if (!pm.environment.get(\"id\")) {\r",
+                  "    throw new Error(\"BookingId missing! Run Create first.\");\r",
+                  "}\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "token={{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstname\": \"{{update_firstname}}\",\r\n  \"lastname\": \"{{update_lastname}}\",\r\n  \"totalprice\": \"{{update_totalprice}}\",\r\n  \"depositpaid\": {{depositpaid_bool}},\r\n  \"bookingdates\": {\r\n    \"checkin\": \"{{update_checkin}}\",\r\n    \"checkout\": \"{{update_checkout}}\"\r\n  },\r\n  \"additionalneeds\": \"{{update_additionalneeds}}\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://restful-booker.herokuapp.com/booking/{{id}}",
+              "protocol": "https",
+              "host": [
+                "restful-booker",
+                "herokuapp",
+                "com"
+              ],
+              "path": [
+                "booking",
+                "{{id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,2341 @@
+{
+  "collection": {
+    "_": {
+      "postman_id": "fcdfa681-2e93-4205-b622-31dd4ac1980c",
+      "exporter_id": "29107702"
+    },
+    "item": [
+      {
+        "id": "1df0eb27-3a71-4974-926d-edfb73d375ee",
+        "name": "auth",
+        "item": [
+          {
+            "id": "f1b26595-46a0-4205-88ea-f03ec3cfa03c",
+            "name": "Auth - CreateToken",
+            "request": {
+              "url": {
+                "protocol": "https",
+                "path": [
+                  "auth"
+                ],
+                "host": [
+                  "restful-booker",
+                  "herokuapp",
+                  "com"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "// {\r\n//     \"username\" : \"admin\",\r\n//     \"password\" : \"password123\"\r\n// }\r\n\r\n{\r\n    \"username\" : \"{{username}}\",\r\n    \"password\" : \"{{password}}\"\r\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "945a68d6-5b7b-49d5-a7c4-af5469f18419",
+                  "type": "text/javascript",
+                  "packages": {},
+                  "exec": [
+                    "// var jsonBody = pm.response.json();\r",
+                    "// console.log(typeof(jsonBody))\r",
+                    "\r",
+                    "// pm.environment.set(\"token\", jsonBody.token)\r",
+                    "\r",
+                    "// pm.test(\"Token is validate properly.\", ()=>{\r",
+                    "//     pm.expect(jsonBody.token).to.be.eql(pm.environment.get(\"token\"))\r",
+                    "// })\r",
+                    "\r",
+                    "var jsonBody = null;\r",
+                    "var iteration = pm.info.iteration + 1;\r",
+                    "let responseText = pm.response.text();\r",
+                    "\r",
+                    "try{\r",
+                    "    jsonBody = JSON.parse(responseText);\r",
+                    "}catch(e){\r",
+                    "    console.log(\"Response is not a valid JSON\");\r",
+                    "}\r",
+                    "\r",
+                    "// 1. Valid login → token should exist\r",
+                    "if (jsonBody && jsonBody.token) {\r",
+                    "    pm.test(\"Iteration \" + iteration + \" → Valid login (Token generated)\", function () {\r",
+                    "        pm.expect(jsonBody.token).to.not.be.undefined;\r",
+                    "        pm.environment.set(\"token\", jsonBody.token);\r",
+                    "        console.log(jsonBody.token)\r",
+                    "    });\r",
+                    "}\r",
+                    "\r",
+                    "// 2. Invalid login → Bad credentials\r",
+                    "else if (jsonBody && jsonBody.reason === \"Bad credentials\") {\r",
+                    "    pm.test(\"Iteration \" + iteration + \" → Invalid login (Bad credentials)\", function () {\r",
+                    "        pm.expect(jsonBody.reason).to.eql(\"Bad credentials\");\r",
+                    "    });\r",
+                    "}\r",
+                    "\r",
+                    "// 3. Bad request → Non JSON response\r",
+                    "else if (pm.response.code === 400) {\r",
+                    "    pm.test(\"Iteration \" + iteration + \" → Bad request\", function () {\r",
+                    "        pm.expect(pm.response.code).to.eql(400);\r",
+                    "    });\r",
+                    "}\r",
+                    "\r",
+                    "// 4. Other unexpected cases\r",
+                    "else {\r",
+                    "    pm.test(\"Iteration \" + iteration + \" → Unexpected response\", function () {\r",
+                    "        pm.fail(\"Unexpected response: \" + responseText);\r",
+                    "    });\r",
+                    "}"
+                  ]
+                }
+              },
+              {
+                "listen": "prerequest",
+                "script": {
+                  "id": "ad2c5c49-890a-4523-ac8b-b5d27a8a22b5",
+                  "type": "text/javascript",
+                  "packages": {},
+                  "exec": [
+                    ""
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "event": []
+      },
+      {
+        "id": "02033de4-3e8e-4331-9f9d-a11c6ab32fca",
+        "name": "booking",
+        "item": [
+          {
+            "id": "776370bc-e152-49ce-b911-af804ddecfd9",
+            "name": "Create booking",
+            "request": {
+              "url": {
+                "protocol": "https",
+                "path": [
+                  "booking"
+                ],
+                "host": [
+                  "restful-booker",
+                  "herokuapp",
+                  "com"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "method": "POST",
+              "body": {
+                "mode": "raw",
+                "raw": "{\r\n  \"firstname\": \"{{firstname}}\",\r\n  \"lastname\": \"{{lastname}}\",\r\n  \"totalprice\": \"{{totalprice}}\",\r\n  \"depositpaid\": {{depositpaid_bool}},\r\n  \"bookingdates\": {\r\n    \"checkin\": \"{{checkin}}\",\r\n    \"checkout\": \"{{checkout}}\"\r\n  },\r\n  \"additionalneeds\": \"{{additionalneeds}}\"\r\n}\r\n",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "auth": {
+                "type": "bearer",
+                "bearer": [
+                  {
+                    "type": "string",
+                    "value": "{{token}}",
+                    "key": "token"
+                  }
+                ]
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "dd93c1d9-2612-4885-94ba-1f429d58c169",
+                  "type": "text/javascript",
+                  "packages": {},
+                  "exec": [
+                    "// Parse JSON response",
+                    "const json = pm.response.json();",
+                    "console.log(json)",
+                    "",
+                    "pm.environment.set(\"id\", json.bookingid); // store booking id for future requests",
+                    "console.log(\"booking id \"+json.bookingid)",
+                    "",
+                    "// Test status code",
+                    "pm.test(\"Status code is 200 for valid token\", function() {",
+                    "    pm.response.to.have.status(200);",
+                    "",
+                    "});",
+                    "",
+                    "// Verify the response time",
+                    "pm.test(\"Response time is less than 200ms\", function () {",
+                    "    pm.expect(pm.response.responseTime).to.be.below(200);",
+                    "});",
+                    "",
+                    "// No authentication errors",
+                    "pm.test(\"No Authentication error\", () => {",
+                    "    pm.expect(pm.response.code).to.not.be.oneOf([401, 403]);",
+                    "});",
+                    "",
+                    "// Verify response body is not null",
+                    "pm.test(\"Response contains expected data\", () => {",
+                    "    pm.expect(json).to.not.be.null;",
+                    "});",
+                    "",
+                    "// Booking ID",
+                    "pm.test(\"Booking ID is present\", function () {",
+                    "    pm.expect(json.bookingid).to.not.be.null;",
+                    "});",
+                    "",
+                    "// First Name",
+                    "pm.test(\"First Name is correct\", function () {",
+                    "    pm.expect(json.booking.firstname).to.eql(pm.iterationData.get(\"firstname\"));",
+                    "});",
+                    "",
+                    "// Last Name",
+                    "pm.test(\"Last Name is correct\", function () {",
+                    "    pm.expect(json.booking.lastname).to.eql(pm.iterationData.get(\"lastname\"));",
+                    "});",
+                    "",
+                    "// Total Price",
+                    "pm.test(\"Total Price is correct\", function () {",
+                    "    pm.expect(json.booking.totalprice).to.eql(pm.iterationData.get(\"totalprice\"));",
+                    "});",
+                    "",
+                    "// Deposit Paid",
+                    "pm.test(\"Deposit Paid is correct\", function () {",
+                    "    const depositePaid = pm.iterationData.get(\"depositpaid\"); // store the csv data in a variable",
+                    "    const expectedDeposit = String(depositePaid).trim().toLowerCase() === 'true'; // convert the string to a boolean",
+                    "",
+                    "    console.log(\"Before convert the csv data type : \"+typeof(depositePaid) + \" value: \" + depositePaid)",
+                    "    console.log(\"After convert the csv data type : \"+typeof(expectedDeposit) + \" value: \" + expectedDeposit)",
+                    "    console.log(\"Response depositePaid data type : \"+typeof(json.booking.depositpaid) + \" value: \" + json.booking.depositpaid)",
+                    "",
+                    "    console.log(",
+                    "            \"CSV raw value 👉 [\" + depositePaid + \"]\",",
+                    "            \"length:\", String(depositePaid).length",
+                    "    );",
+                    "",
+                    "    pm.expect(json.booking.depositpaid).to.eql(expectedDeposit);",
+                    "  ",
+                    "});",
+                    "",
+                    "// Booking Check-in Date",
+                    "pm.test(\"Booking Check-in Date is correct\", function () {",
+                    "    pm.expect(json.booking.bookingdates.checkin).to.eql(pm.iterationData.get(\"checkin\"));",
+                    "});",
+                    "",
+                    "// Booking Check-out Date",
+                    "pm.test(\"Booking Check-out Date is correct\", function () {",
+                    "    pm.expect(json.booking.bookingdates.checkout).to.eql(pm.iterationData.get(\"checkout\"));",
+                    "});",
+                    "",
+                    "// Additional Needs",
+                    "pm.test(\"Additional Needs is correct\", () => {",
+                    "    pm.expect(json.booking.additionalneeds).to.eql(pm.iterationData.get(\"additionalneeds\"));",
+                    "});",
+                    "",
+                    "// Headers",
+                    "pm.test(\"Response has required headers\", () => {",
+                    "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.eql(\"application/json; charset=utf-8\");",
+                    "    pm.response.to.have.header(\"Date\");",
+                    "});",
+                    "",
+                    "// Authorization check",
+                    "pm.test(\"Authorization is successful\", () => {",
+                    "    const responseToken = pm.environment.get(\"token\");",
+                    "    pm.expect(responseToken).to.not.be.undefined;",
+                    "});",
+                    "",
+                    "",
+                    "// console.log(\"Status:\", pm.response.code);",
+                    "// console.log(\"Raw response:\", pm.response.text());",
+                    ""
+                  ],
+                  "_lastExecutionId": "6fe5378d-ab70-498e-88c6-b69863bc09be"
+                }
+              },
+              {
+                "listen": "prerequest",
+                "script": {
+                  "id": "3b3d0d3a-607c-491d-92ce-0f910e389508",
+                  "type": "text/javascript",
+                  "packages": {},
+                  "exec": [
+                    "// const csvData = {\r",
+                    "//     firstname: pm.iterationData.get(\"First_Name\"),\r",
+                    "//     lastname: pm.iterationData.get(\"Last_Name\"),\r",
+                    "//     totalprice: pm.iterationData.get(\"Total_Price\"),\r",
+                    "//     depositpaid: pm.iterationData.get(\"depositpaid\"),\r",
+                    "//     checkin: pm.iterationData.get(\"checkin_date\"),\r",
+                    "//     checkout: pm.iterationData.get(\"checkOut_date\"),\r",
+                    "//     additionalneeds: pm.iterationData.get(\"Additional_Needs\")\r",
+                    "// };\r",
+                    "\r",
+                    "// console.log(\"pre\"+csvData)\r",
+                    "// pm.environment.set(\"firstname\", csvData.firstname);\r",
+                    "// pm.environment.set(\"lastname\", csvData.lastname);\r",
+                    "// pm.environment.set(\"totalprice\", csvData.totalprice);\r",
+                    "// pm.environment.set(\"depositpaid\", csvData.depositpaid);\r",
+                    "// pm.environment.set(\"checkin\", csvData.checkin);\r",
+                    "// pm.environment.set(\"checkout\", csvData.checkout);\r",
+                    "// pm.environment.set(\"additionalneeds\", csvData.additionalneeds);\r",
+                    "\r",
+                    "console.log(\"Before Booking api execute the Token is : \" + pm.environment.get(\"token\"));\r",
+                    "\r",
+                    "let raw = pm.iterationData.get(\"depositpaid\");\r",
+                    "\r",
+                    "// fallback protection (VERY important for Newman)\r",
+                    "if (raw === undefined || raw === null === \"\") {\r",
+                    "    raw = false;\r",
+                    "}\r",
+                    "\r",
+                    "const depositpaid_bool =\r",
+                    "    String(raw).toLowerCase() === \"true\";\r",
+                    "\r",
+                    "pm.variables.set(\"depositpaid_bool\", depositpaid_bool);\r",
+                    "\r",
+                    "console.log(\"depositpaid_bool =\", depositpaid_bool);\r",
+                    "\r",
+                    "\r",
+                    "console.log(\"Final request body:\");\r",
+                    "console.log(pm.request.body.raw);\r",
+                    ""
+                  ],
+                  "_lastExecutionId": "6aaca326-e31e-4b28-ac3b-8e0fa6949edf"
+                }
+              }
+            ]
+          },
+          {
+            "id": "4b3161cd-4b9b-4eab-815d-18847cd0e20d",
+            "name": "Update Booking",
+            "request": {
+              "url": {
+                "protocol": "https",
+                "path": [
+                  "booking",
+                  "{{id}}"
+                ],
+                "host": [
+                  "restful-booker",
+                  "herokuapp",
+                  "com"
+                ],
+                "query": [],
+                "variable": []
+              },
+              "header": [
+                {
+                  "key": "Cookie",
+                  "value": "token={{token}}"
+                }
+              ],
+              "method": "PUT",
+              "body": {
+                "mode": "raw",
+                "raw": "{\r\n  \"firstname\": \"{{update_firstname}}\",\r\n  \"lastname\": \"{{update_lastname}}\",\r\n  \"totalprice\": \"{{update_totalprice}}\",\r\n  \"depositpaid\": {{depositpaid_bool}},\r\n  \"bookingdates\": {\r\n    \"checkin\": \"{{update_checkin}}\",\r\n    \"checkout\": \"{{update_checkout}}\"\r\n  },\r\n  \"additionalneeds\": \"{{update_additionalneeds}}\"\r\n}\r\n",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            },
+            "response": [],
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "id": "3c61ea16-e0ae-465b-bde7-9f050c5a4328",
+                  "type": "text/javascript",
+                  "packages": {},
+                  "exec": [
+                    "var statusCode = pm.response.code;\r",
+                    "console.log(statusCode);\r",
+                    "\r",
+                    "var jsonBody = pm.response.json(); // parse response JSON\r",
+                    "\r",
+                    "if (statusCode === 200) {\r",
+                    "\r",
+                    "    pm.test(\"Status code is 200\", function () {\r",
+                    "        pm.response.to.have.status(200);\r",
+                    "    });\r",
+                    "\r",
+                    "    pm.test(\"First Name matches iteration data\", function () {\r",
+                    "        pm.expect(jsonBody.firstname).to.eql(pm.iterationData.get(\"update_firstname\"));\r",
+                    "    });\r",
+                    "\r",
+                    "    pm.test(\"Last Name matches iteration data\", function () {\r",
+                    "        pm.expect(jsonBody.lastname).to.eql(pm.iterationData.get(\"update_lastname\"));\r",
+                    "    });\r",
+                    "\r",
+                    "    pm.test(\"Total Price matches iteration data\", function () {\r",
+                    "        pm.expect(jsonBody.totalprice).to.eql(pm.iterationData.get(\"update_totalprice\"));\r",
+                    "    });\r",
+                    "\r",
+                    "    pm.test(\"Deposit Paid matches iteration data\", function () {\r",
+                    "\r",
+                    "        const depositePaid = pm.iterationData.get(\"update_depositpaid\"); // store the csv data in a variable\r",
+                    "        const expectedDeposit = String(depositePaid).trim().toLowerCase() === 'true'; // convert the string to a boolean\r",
+                    "\r",
+                    "        console.log(\"Before convert the csv data type : \"+typeof(depositePaid) + \" value: \" + depositePaid)\r",
+                    "        console.log(\"After convert the csv data type : \"+typeof(expectedDeposit) + \" value: \" + expectedDeposit)\r",
+                    "        console.log(\"Response depositePaid data type : \"+typeof(jsonBody.depositpaid) + \" value: \" + jsonBody.depositpaid)\r",
+                    "\r",
+                    "        console.log(\r",
+                    "                \"CSV raw value 👉 [\" + depositePaid + \"]\",\r",
+                    "                \"length:\", String(depositePaid).length\r",
+                    "        );\r",
+                    "\r",
+                    "        pm.expect(jsonBody.depositpaid).to.eql(expectedDeposit);\r",
+                    "    \r",
+                    "    });\r",
+                    "\r",
+                    "    pm.test(\"Check-in date matches iteration data\", function () {\r",
+                    "        pm.expect(jsonBody.bookingdates.checkin).to.eql(pm.iterationData.get(\"update_checkin\"));\r",
+                    "    });\r",
+                    "\r",
+                    "    pm.test(\"Check-out date matches iteration data\", function () {\r",
+                    "        pm.expect(jsonBody.bookingdates.checkout).to.eql(pm.iterationData.get(\"update_checkout\"));\r",
+                    "    });\r",
+                    "\r",
+                    "    pm.test(\"Additional Needs matches iteration data\", function () {\r",
+                    "        pm.expect(jsonBody.additionalneeds).to.eql(pm.iterationData.get(\"update_additionalneeds\"));\r",
+                    "    });\r",
+                    "\r",
+                    "} else {\r",
+                    "    pm.test(\"Status code is \" + statusCode, function () {\r",
+                    "        pm.response.to.have.status(statusCode);\r",
+                    "    });\r",
+                    "}\r",
+                    ""
+                  ],
+                  "_lastExecutionId": "ca6d6032-41f7-4994-a773-5fb0a2c1a06a"
+                }
+              },
+              {
+                "listen": "prerequest",
+                "script": {
+                  "id": "b7be445d-afb3-45cb-92fc-508dcc53dd3d",
+                  "type": "text/javascript",
+                  "packages": {},
+                  "exec": [
+                    "// var firsname = pm.variables.replaceIn('{{$randomFirstName}}');\r",
+                    "// console.log(\"first name:\"+firsname)\r",
+                    "// pm.environment.set(\"First_Name\", firsname);\r",
+                    "\r",
+                    "// // set random lastname to envrionment.\r",
+                    "\r",
+                    "// var lastname = pm.variables.replaceIn('{{$randomLastName}}');\r",
+                    "// console.log(\"Last name: \"+lastname)\r",
+                    "// pm.environment.set(\"Last_Name\", lastname);\r",
+                    "\r",
+                    "\r",
+                    "console.log(\"Before Booking api execute the Token is : \" + pm.environment.get(\"token\"));\r",
+                    "console.log(\"Booking id: \"+pm.environment.get('id'))\r",
+                    "\r",
+                    "let raw = pm.iterationData.get(\"update_depositpaid\");\r",
+                    "\r",
+                    "// fallback protection (VERY important for Newman)\r",
+                    "if (raw === undefined || raw === null === \"\") {\r",
+                    "    raw = false;\r",
+                    "}\r",
+                    "\r",
+                    "const depositpaid_bool =\r",
+                    "    String(raw).toLowerCase() === \"true\";\r",
+                    "\r",
+                    "pm.variables.set(\"depositpaid_bool\", depositpaid_bool);\r",
+                    "\r",
+                    "console.log(\"depositpaid_bool =\", depositpaid_bool);\r",
+                    "\r",
+                    "\r",
+                    "console.log(\"Final request body:\");\r",
+                    "console.log(pm.request.body.raw);\r",
+                    "\r",
+                    "console.log(\"Token:\", pm.environment.get(\"token\"));\r",
+                    "console.log(\"BookingId:\", pm.environment.get(\"id\"));\r",
+                    "\r",
+                    "\r",
+                    "if (!pm.environment.get(\"token\")) {\r",
+                    "    \r",
+                    "    throw new Error(\"Token missing! Forbidden will occur.\");\r",
+                    "}\r",
+                    "if (!pm.environment.get(\"id\")) {\r",
+                    "    throw new Error(\"BookingId missing! Run Create first.\");\r",
+                    "}\r",
+                    ""
+                  ],
+                  "_lastExecutionId": "5010d313-8b16-437b-98db-80e9585d6981"
+                }
+              }
+            ]
+          }
+        ],
+        "event": []
+      }
+    ],
+    "event": [],
+    "variable": [],
+    "info": {
+      "_postman_id": "fcdfa681-2e93-4205-b622-31dd4ac1980c",
+      "name": "Data Driven Testing",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    }
+  },
+  "environment": {
+    "_": {
+      "postman_variable_scope": "environment",
+      "postman_exported_at": "2026-02-04T10:13:33.510Z",
+      "postman_exported_using": "Newman/6.2.2"
+    },
+    "id": "8d36369d-a0de-484d-93fe-746f6c7efcb7",
+    "name": "DataDrivenTesting",
+    "values": [
+      {
+        "type": "any",
+        "value": "6c58e2d1441e2b4",
+        "key": "token"
+      },
+      {
+        "type": "any",
+        "value": 2524,
+        "key": "id"
+      }
+    ]
+  },
+  "globals": {
+    "id": "d30108a2-f86e-4c2b-830b-d05c9fb74ac2",
+    "values": []
+  },
+  "run": {
+    "stats": {
+      "iterations": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "items": {
+        "total": 2,
+        "pending": 0,
+        "failed": 0
+      },
+      "scripts": {
+        "total": 4,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequests": {
+        "total": 2,
+        "pending": 0,
+        "failed": 0
+      },
+      "requests": {
+        "total": 2,
+        "pending": 0,
+        "failed": 0
+      },
+      "tests": {
+        "total": 2,
+        "pending": 0,
+        "failed": 0
+      },
+      "assertions": {
+        "total": 22,
+        "pending": 0,
+        "failed": 1
+      },
+      "testScripts": {
+        "total": 2,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequestScripts": {
+        "total": 2,
+        "pending": 0,
+        "failed": 0
+      }
+    },
+    "timings": {
+      "responseAverage": 1166,
+      "responseMin": 308,
+      "responseMax": 2024,
+      "responseSd": 858,
+      "dnsAverage": 0,
+      "dnsMin": 0,
+      "dnsMax": 0,
+      "dnsSd": 0,
+      "firstByteAverage": 0,
+      "firstByteMin": 0,
+      "firstByteMax": 0,
+      "firstByteSd": 0,
+      "started": 1770200138249,
+      "completed": 1770200140715
+    },
+    "executions": [
+      {
+        "cursor": {
+          "position": 0,
+          "iteration": 0,
+          "length": 2,
+          "cycles": 1,
+          "empty": false,
+          "eof": false,
+          "bof": true,
+          "cr": false,
+          "ref": "680496dc-8f36-4e96-85d1-dbf730c259c6",
+          "httpRequestId": "21e9a3fc-1478-4a82-897b-62361a3ef450"
+        },
+        "item": {
+          "id": "776370bc-e152-49ce-b911-af804ddecfd9",
+          "name": "Create booking",
+          "request": {
+            "url": {
+              "protocol": "https",
+              "path": [
+                "booking"
+              ],
+              "host": [
+                "restful-booker",
+                "herokuapp",
+                "com"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstname\": \"{{firstname}}\",\r\n  \"lastname\": \"{{lastname}}\",\r\n  \"totalprice\": \"{{totalprice}}\",\r\n  \"depositpaid\": {{depositpaid_bool}},\r\n  \"bookingdates\": {\r\n    \"checkin\": \"{{checkin}}\",\r\n    \"checkout\": \"{{checkout}}\"\r\n  },\r\n  \"additionalneeds\": \"{{additionalneeds}}\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "type": "string",
+                  "value": "{{token}}",
+                  "key": "token"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "dd93c1d9-2612-4885-94ba-1f429d58c169",
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "// Parse JSON response",
+                  "const json = pm.response.json();",
+                  "console.log(json)",
+                  "",
+                  "pm.environment.set(\"id\", json.bookingid); // store booking id for future requests",
+                  "console.log(\"booking id \"+json.bookingid)",
+                  "",
+                  "// Test status code",
+                  "pm.test(\"Status code is 200 for valid token\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "",
+                  "});",
+                  "",
+                  "// Verify the response time",
+                  "pm.test(\"Response time is less than 200ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(200);",
+                  "});",
+                  "",
+                  "// No authentication errors",
+                  "pm.test(\"No Authentication error\", () => {",
+                  "    pm.expect(pm.response.code).to.not.be.oneOf([401, 403]);",
+                  "});",
+                  "",
+                  "// Verify response body is not null",
+                  "pm.test(\"Response contains expected data\", () => {",
+                  "    pm.expect(json).to.not.be.null;",
+                  "});",
+                  "",
+                  "// Booking ID",
+                  "pm.test(\"Booking ID is present\", function () {",
+                  "    pm.expect(json.bookingid).to.not.be.null;",
+                  "});",
+                  "",
+                  "// First Name",
+                  "pm.test(\"First Name is correct\", function () {",
+                  "    pm.expect(json.booking.firstname).to.eql(pm.iterationData.get(\"firstname\"));",
+                  "});",
+                  "",
+                  "// Last Name",
+                  "pm.test(\"Last Name is correct\", function () {",
+                  "    pm.expect(json.booking.lastname).to.eql(pm.iterationData.get(\"lastname\"));",
+                  "});",
+                  "",
+                  "// Total Price",
+                  "pm.test(\"Total Price is correct\", function () {",
+                  "    pm.expect(json.booking.totalprice).to.eql(pm.iterationData.get(\"totalprice\"));",
+                  "});",
+                  "",
+                  "// Deposit Paid",
+                  "pm.test(\"Deposit Paid is correct\", function () {",
+                  "    const depositePaid = pm.iterationData.get(\"depositpaid\"); // store the csv data in a variable",
+                  "    const expectedDeposit = String(depositePaid).trim().toLowerCase() === 'true'; // convert the string to a boolean",
+                  "",
+                  "    console.log(\"Before convert the csv data type : \"+typeof(depositePaid) + \" value: \" + depositePaid)",
+                  "    console.log(\"After convert the csv data type : \"+typeof(expectedDeposit) + \" value: \" + expectedDeposit)",
+                  "    console.log(\"Response depositePaid data type : \"+typeof(json.booking.depositpaid) + \" value: \" + json.booking.depositpaid)",
+                  "",
+                  "    console.log(",
+                  "            \"CSV raw value 👉 [\" + depositePaid + \"]\",",
+                  "            \"length:\", String(depositePaid).length",
+                  "    );",
+                  "",
+                  "    pm.expect(json.booking.depositpaid).to.eql(expectedDeposit);",
+                  "  ",
+                  "});",
+                  "",
+                  "// Booking Check-in Date",
+                  "pm.test(\"Booking Check-in Date is correct\", function () {",
+                  "    pm.expect(json.booking.bookingdates.checkin).to.eql(pm.iterationData.get(\"checkin\"));",
+                  "});",
+                  "",
+                  "// Booking Check-out Date",
+                  "pm.test(\"Booking Check-out Date is correct\", function () {",
+                  "    pm.expect(json.booking.bookingdates.checkout).to.eql(pm.iterationData.get(\"checkout\"));",
+                  "});",
+                  "",
+                  "// Additional Needs",
+                  "pm.test(\"Additional Needs is correct\", () => {",
+                  "    pm.expect(json.booking.additionalneeds).to.eql(pm.iterationData.get(\"additionalneeds\"));",
+                  "});",
+                  "",
+                  "// Headers",
+                  "pm.test(\"Response has required headers\", () => {",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.eql(\"application/json; charset=utf-8\");",
+                  "    pm.response.to.have.header(\"Date\");",
+                  "});",
+                  "",
+                  "// Authorization check",
+                  "pm.test(\"Authorization is successful\", () => {",
+                  "    const responseToken = pm.environment.get(\"token\");",
+                  "    pm.expect(responseToken).to.not.be.undefined;",
+                  "});",
+                  "",
+                  "",
+                  "// console.log(\"Status:\", pm.response.code);",
+                  "// console.log(\"Raw response:\", pm.response.text());",
+                  ""
+                ],
+                "_lastExecutionId": "6fe5378d-ab70-498e-88c6-b69863bc09be"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "3b3d0d3a-607c-491d-92ce-0f910e389508",
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "// const csvData = {\r",
+                  "//     firstname: pm.iterationData.get(\"First_Name\"),\r",
+                  "//     lastname: pm.iterationData.get(\"Last_Name\"),\r",
+                  "//     totalprice: pm.iterationData.get(\"Total_Price\"),\r",
+                  "//     depositpaid: pm.iterationData.get(\"depositpaid\"),\r",
+                  "//     checkin: pm.iterationData.get(\"checkin_date\"),\r",
+                  "//     checkout: pm.iterationData.get(\"checkOut_date\"),\r",
+                  "//     additionalneeds: pm.iterationData.get(\"Additional_Needs\")\r",
+                  "// };\r",
+                  "\r",
+                  "// console.log(\"pre\"+csvData)\r",
+                  "// pm.environment.set(\"firstname\", csvData.firstname);\r",
+                  "// pm.environment.set(\"lastname\", csvData.lastname);\r",
+                  "// pm.environment.set(\"totalprice\", csvData.totalprice);\r",
+                  "// pm.environment.set(\"depositpaid\", csvData.depositpaid);\r",
+                  "// pm.environment.set(\"checkin\", csvData.checkin);\r",
+                  "// pm.environment.set(\"checkout\", csvData.checkout);\r",
+                  "// pm.environment.set(\"additionalneeds\", csvData.additionalneeds);\r",
+                  "\r",
+                  "console.log(\"Before Booking api execute the Token is : \" + pm.environment.get(\"token\"));\r",
+                  "\r",
+                  "let raw = pm.iterationData.get(\"depositpaid\");\r",
+                  "\r",
+                  "// fallback protection (VERY important for Newman)\r",
+                  "if (raw === undefined || raw === null === \"\") {\r",
+                  "    raw = false;\r",
+                  "}\r",
+                  "\r",
+                  "const depositpaid_bool =\r",
+                  "    String(raw).toLowerCase() === \"true\";\r",
+                  "\r",
+                  "pm.variables.set(\"depositpaid_bool\", depositpaid_bool);\r",
+                  "\r",
+                  "console.log(\"depositpaid_bool =\", depositpaid_bool);\r",
+                  "\r",
+                  "\r",
+                  "console.log(\"Final request body:\");\r",
+                  "console.log(pm.request.body.raw);\r",
+                  ""
+                ],
+                "_lastExecutionId": "6aaca326-e31e-4b28-ac3b-8e0fa6949edf"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "https",
+            "path": [
+              "booking"
+            ],
+            "host": [
+              "restful-booker",
+              "herokuapp",
+              "com"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json",
+              "system": true
+            },
+            {
+              "key": "Authorization",
+              "value": "Bearer 6c58e2d1441e2b4",
+              "system": true
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "804154d1-3f4a-4007-a9a9-2c343f81c6a4",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "restful-booker.herokuapp.com",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "227",
+              "system": true
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\r\n  \"firstname\": \"Kadir\",\r\n  \"lastname\": \"Habibi\",\r\n  \"totalprice\": \"1900\",\r\n  \"depositpaid\": false,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-02-23\",\r\n    \"checkout\": \"2026-02-25\"\r\n  },\r\n  \"additionalneeds\": \"Breakfast\"\r\n}\r\n",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          },
+          "auth": {
+            "type": "bearer",
+            "bearer": [
+              {
+                "type": "string",
+                "value": "6c58e2d1441e2b4",
+                "key": "token"
+              }
+            ]
+          }
+        },
+        "response": {
+          "id": "c39ca5c0-6a92-4ae8-a331-ed327db7be84",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Length",
+              "value": "202"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 04 Feb 2026 10:15:32 GMT"
+            },
+            {
+              "key": "Etag",
+              "value": "W/\"ca-S+eJ0BDkWFJuGsOfUagXbClaLVg\""
+            },
+            {
+              "key": "Nel",
+              "value": "{\"report_to\":\"heroku-nel\",\"response_headers\":[\"Via\"],\"max_age\":3600,\"success_fraction\":0.01,\"failure_fraction\":0.1}"
+            },
+            {
+              "key": "Report-To",
+              "value": "{\"group\":\"heroku-nel\",\"endpoints\":[{\"url\":\"https://nel.heroku.com/reports?s=uRuXyv8dUfNJYq3Uybox2JqFYi7b2HRB%2BEXd%2Bhg07y4%3D\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\u0026ts=1770200132\"}],\"max_age\":3600}"
+            },
+            {
+              "key": "Reporting-Endpoints",
+              "value": "heroku-nel=\"https://nel.heroku.com/reports?s=uRuXyv8dUfNJYq3Uybox2JqFYi7b2HRB%2BEXd%2Bhg07y4%3D&sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&ts=1770200132\""
+            },
+            {
+              "key": "Server",
+              "value": "Heroku"
+            },
+            {
+              "key": "Via",
+              "value": "1.1 heroku-router"
+            },
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              98,
+              111,
+              111,
+              107,
+              105,
+              110,
+              103,
+              105,
+              100,
+              34,
+              58,
+              50,
+              53,
+              50,
+              52,
+              44,
+              34,
+              98,
+              111,
+              111,
+              107,
+              105,
+              110,
+              103,
+              34,
+              58,
+              123,
+              34,
+              102,
+              105,
+              114,
+              115,
+              116,
+              110,
+              97,
+              109,
+              101,
+              34,
+              58,
+              34,
+              75,
+              97,
+              100,
+              105,
+              114,
+              34,
+              44,
+              34,
+              108,
+              97,
+              115,
+              116,
+              110,
+              97,
+              109,
+              101,
+              34,
+              58,
+              34,
+              72,
+              97,
+              98,
+              105,
+              98,
+              105,
+              34,
+              44,
+              34,
+              116,
+              111,
+              116,
+              97,
+              108,
+              112,
+              114,
+              105,
+              99,
+              101,
+              34,
+              58,
+              49,
+              57,
+              48,
+              48,
+              44,
+              34,
+              100,
+              101,
+              112,
+              111,
+              115,
+              105,
+              116,
+              112,
+              97,
+              105,
+              100,
+              34,
+              58,
+              102,
+              97,
+              108,
+              115,
+              101,
+              44,
+              34,
+              98,
+              111,
+              111,
+              107,
+              105,
+              110,
+              103,
+              100,
+              97,
+              116,
+              101,
+              115,
+              34,
+              58,
+              123,
+              34,
+              99,
+              104,
+              101,
+              99,
+              107,
+              105,
+              110,
+              34,
+              58,
+              34,
+              50,
+              48,
+              50,
+              54,
+              45,
+              48,
+              50,
+              45,
+              50,
+              51,
+              34,
+              44,
+              34,
+              99,
+              104,
+              101,
+              99,
+              107,
+              111,
+              117,
+              116,
+              34,
+              58,
+              34,
+              50,
+              48,
+              50,
+              54,
+              45,
+              48,
+              50,
+              45,
+              50,
+              53,
+              34,
+              125,
+              44,
+              34,
+              97,
+              100,
+              100,
+              105,
+              116,
+              105,
+              111,
+              110,
+              97,
+              108,
+              110,
+              101,
+              101,
+              100,
+              115,
+              34,
+              58,
+              34,
+              66,
+              114,
+              101,
+              97,
+              107,
+              102,
+              97,
+              115,
+              116,
+              34,
+              125,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 2024,
+          "responseSize": 202
+        },
+        "id": "776370bc-e152-49ce-b911-af804ddecfd9",
+        "assertions": [
+          {
+            "assertion": "Status code is 200 for valid token",
+            "skipped": false
+          },
+          {
+            "assertion": "Response time is less than 200ms",
+            "skipped": false,
+            "error": {
+              "name": "AssertionError",
+              "index": 1,
+              "test": "Response time is less than 200ms",
+              "message": "expected 2024 to be below 200",
+              "stack": "AssertionError: expected 2024 to be below 200\n   at Object.eval sandbox-script.js:2:1)"
+            }
+          },
+          {
+            "assertion": "No Authentication error",
+            "skipped": false
+          },
+          {
+            "assertion": "Response contains expected data",
+            "skipped": false
+          },
+          {
+            "assertion": "Booking ID is present",
+            "skipped": false
+          },
+          {
+            "assertion": "First Name is correct",
+            "skipped": false
+          },
+          {
+            "assertion": "Last Name is correct",
+            "skipped": false
+          },
+          {
+            "assertion": "Total Price is correct",
+            "skipped": false
+          },
+          {
+            "assertion": "Deposit Paid is correct",
+            "skipped": false
+          },
+          {
+            "assertion": "Booking Check-in Date is correct",
+            "skipped": false
+          },
+          {
+            "assertion": "Booking Check-out Date is correct",
+            "skipped": false
+          },
+          {
+            "assertion": "Additional Needs is correct",
+            "skipped": false
+          },
+          {
+            "assertion": "Response has required headers",
+            "skipped": false
+          },
+          {
+            "assertion": "Authorization is successful",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "5f27179d-1ef3-499b-9316-57cef50e9dee",
+          "length": 2,
+          "cycles": 1,
+          "position": 1,
+          "iteration": 0,
+          "httpRequestId": "dd3889a5-f9de-4497-b57d-6df04c842e2f"
+        },
+        "item": {
+          "id": "4b3161cd-4b9b-4eab-815d-18847cd0e20d",
+          "name": "Update Booking",
+          "request": {
+            "url": {
+              "protocol": "https",
+              "path": [
+                "booking",
+                "{{id}}"
+              ],
+              "host": [
+                "restful-booker",
+                "herokuapp",
+                "com"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "method": "PUT",
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstname\": \"{{update_firstname}}\",\r\n  \"lastname\": \"{{update_lastname}}\",\r\n  \"totalprice\": \"{{update_totalprice}}\",\r\n  \"depositpaid\": {{depositpaid_bool}},\r\n  \"bookingdates\": {\r\n    \"checkin\": \"{{update_checkin}}\",\r\n    \"checkout\": \"{{update_checkout}}\"\r\n  },\r\n  \"additionalneeds\": \"{{update_additionalneeds}}\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "3c61ea16-e0ae-465b-bde7-9f050c5a4328",
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "var statusCode = pm.response.code;\r",
+                  "console.log(statusCode);\r",
+                  "\r",
+                  "var jsonBody = pm.response.json(); // parse response JSON\r",
+                  "\r",
+                  "if (statusCode === 200) {\r",
+                  "\r",
+                  "    pm.test(\"Status code is 200\", function () {\r",
+                  "        pm.response.to.have.status(200);\r",
+                  "    });\r",
+                  "\r",
+                  "    pm.test(\"First Name matches iteration data\", function () {\r",
+                  "        pm.expect(jsonBody.firstname).to.eql(pm.iterationData.get(\"update_firstname\"));\r",
+                  "    });\r",
+                  "\r",
+                  "    pm.test(\"Last Name matches iteration data\", function () {\r",
+                  "        pm.expect(jsonBody.lastname).to.eql(pm.iterationData.get(\"update_lastname\"));\r",
+                  "    });\r",
+                  "\r",
+                  "    pm.test(\"Total Price matches iteration data\", function () {\r",
+                  "        pm.expect(jsonBody.totalprice).to.eql(pm.iterationData.get(\"update_totalprice\"));\r",
+                  "    });\r",
+                  "\r",
+                  "    pm.test(\"Deposit Paid matches iteration data\", function () {\r",
+                  "\r",
+                  "        const depositePaid = pm.iterationData.get(\"update_depositpaid\"); // store the csv data in a variable\r",
+                  "        const expectedDeposit = String(depositePaid).trim().toLowerCase() === 'true'; // convert the string to a boolean\r",
+                  "\r",
+                  "        console.log(\"Before convert the csv data type : \"+typeof(depositePaid) + \" value: \" + depositePaid)\r",
+                  "        console.log(\"After convert the csv data type : \"+typeof(expectedDeposit) + \" value: \" + expectedDeposit)\r",
+                  "        console.log(\"Response depositePaid data type : \"+typeof(jsonBody.depositpaid) + \" value: \" + jsonBody.depositpaid)\r",
+                  "\r",
+                  "        console.log(\r",
+                  "                \"CSV raw value 👉 [\" + depositePaid + \"]\",\r",
+                  "                \"length:\", String(depositePaid).length\r",
+                  "        );\r",
+                  "\r",
+                  "        pm.expect(jsonBody.depositpaid).to.eql(expectedDeposit);\r",
+                  "    \r",
+                  "    });\r",
+                  "\r",
+                  "    pm.test(\"Check-in date matches iteration data\", function () {\r",
+                  "        pm.expect(jsonBody.bookingdates.checkin).to.eql(pm.iterationData.get(\"update_checkin\"));\r",
+                  "    });\r",
+                  "\r",
+                  "    pm.test(\"Check-out date matches iteration data\", function () {\r",
+                  "        pm.expect(jsonBody.bookingdates.checkout).to.eql(pm.iterationData.get(\"update_checkout\"));\r",
+                  "    });\r",
+                  "\r",
+                  "    pm.test(\"Additional Needs matches iteration data\", function () {\r",
+                  "        pm.expect(jsonBody.additionalneeds).to.eql(pm.iterationData.get(\"update_additionalneeds\"));\r",
+                  "    });\r",
+                  "\r",
+                  "} else {\r",
+                  "    pm.test(\"Status code is \" + statusCode, function () {\r",
+                  "        pm.response.to.have.status(statusCode);\r",
+                  "    });\r",
+                  "}\r",
+                  ""
+                ],
+                "_lastExecutionId": "ca6d6032-41f7-4994-a773-5fb0a2c1a06a"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "b7be445d-afb3-45cb-92fc-508dcc53dd3d",
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "// var firsname = pm.variables.replaceIn('{{$randomFirstName}}');\r",
+                  "// console.log(\"first name:\"+firsname)\r",
+                  "// pm.environment.set(\"First_Name\", firsname);\r",
+                  "\r",
+                  "// // set random lastname to envrionment.\r",
+                  "\r",
+                  "// var lastname = pm.variables.replaceIn('{{$randomLastName}}');\r",
+                  "// console.log(\"Last name: \"+lastname)\r",
+                  "// pm.environment.set(\"Last_Name\", lastname);\r",
+                  "\r",
+                  "\r",
+                  "console.log(\"Before Booking api execute the Token is : \" + pm.environment.get(\"token\"));\r",
+                  "console.log(\"Booking id: \"+pm.environment.get('id'))\r",
+                  "\r",
+                  "let raw = pm.iterationData.get(\"update_depositpaid\");\r",
+                  "\r",
+                  "// fallback protection (VERY important for Newman)\r",
+                  "if (raw === undefined || raw === null === \"\") {\r",
+                  "    raw = false;\r",
+                  "}\r",
+                  "\r",
+                  "const depositpaid_bool =\r",
+                  "    String(raw).toLowerCase() === \"true\";\r",
+                  "\r",
+                  "pm.variables.set(\"depositpaid_bool\", depositpaid_bool);\r",
+                  "\r",
+                  "console.log(\"depositpaid_bool =\", depositpaid_bool);\r",
+                  "\r",
+                  "\r",
+                  "console.log(\"Final request body:\");\r",
+                  "console.log(pm.request.body.raw);\r",
+                  "\r",
+                  "console.log(\"Token:\", pm.environment.get(\"token\"));\r",
+                  "console.log(\"BookingId:\", pm.environment.get(\"id\"));\r",
+                  "\r",
+                  "\r",
+                  "if (!pm.environment.get(\"token\")) {\r",
+                  "    \r",
+                  "    throw new Error(\"Token missing! Forbidden will occur.\");\r",
+                  "}\r",
+                  "if (!pm.environment.get(\"id\")) {\r",
+                  "    throw new Error(\"BookingId missing! Run Create first.\");\r",
+                  "}\r",
+                  ""
+                ],
+                "_lastExecutionId": "5010d313-8b16-437b-98db-80e9585d6981"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "https",
+            "path": [
+              "booking",
+              "2524"
+            ],
+            "host": [
+              "restful-booker",
+              "herokuapp",
+              "com"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Cookie",
+              "value": "token=6c58e2d1441e2b4",
+              "system": true
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json",
+              "system": true
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "4ea0eb27-4d40-4440-994c-f06ba9f34170",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "restful-booker.herokuapp.com",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "226",
+              "system": true
+            }
+          ],
+          "method": "PUT",
+          "body": {
+            "mode": "raw",
+            "raw": "{\r\n  \"firstname\": \"Shayan\",\r\n  \"lastname\": \"Sulantan\",\r\n  \"totalprice\": \"2454\",\r\n  \"depositpaid\": true,\r\n  \"bookingdates\": {\r\n    \"checkin\": \"2026-02-24\",\r\n    \"checkout\": \"2026-02-28\"\r\n  },\r\n  \"additionalneeds\": \"dinner\"\r\n}\r\n",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": {
+          "id": "a3412fb7-a420-401e-81b0-e0d8c731c226",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Length",
+              "value": "172"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 04 Feb 2026 10:15:32 GMT"
+            },
+            {
+              "key": "Etag",
+              "value": "W/\"ac-Lncn2vkKNr6hlJTvuZspLyDrG7g\""
+            },
+            {
+              "key": "Nel",
+              "value": "{\"report_to\":\"heroku-nel\",\"response_headers\":[\"Via\"],\"max_age\":3600,\"success_fraction\":0.01,\"failure_fraction\":0.1}"
+            },
+            {
+              "key": "Report-To",
+              "value": "{\"group\":\"heroku-nel\",\"endpoints\":[{\"url\":\"https://nel.heroku.com/reports?s=uRuXyv8dUfNJYq3Uybox2JqFYi7b2HRB%2BEXd%2Bhg07y4%3D\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\u0026ts=1770200132\"}],\"max_age\":3600}"
+            },
+            {
+              "key": "Reporting-Endpoints",
+              "value": "heroku-nel=\"https://nel.heroku.com/reports?s=uRuXyv8dUfNJYq3Uybox2JqFYi7b2HRB%2BEXd%2Bhg07y4%3D&sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&ts=1770200132\""
+            },
+            {
+              "key": "Server",
+              "value": "Heroku"
+            },
+            {
+              "key": "Via",
+              "value": "1.1 heroku-router"
+            },
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              102,
+              105,
+              114,
+              115,
+              116,
+              110,
+              97,
+              109,
+              101,
+              34,
+              58,
+              34,
+              83,
+              104,
+              97,
+              121,
+              97,
+              110,
+              34,
+              44,
+              34,
+              108,
+              97,
+              115,
+              116,
+              110,
+              97,
+              109,
+              101,
+              34,
+              58,
+              34,
+              83,
+              117,
+              108,
+              97,
+              110,
+              116,
+              97,
+              110,
+              34,
+              44,
+              34,
+              116,
+              111,
+              116,
+              97,
+              108,
+              112,
+              114,
+              105,
+              99,
+              101,
+              34,
+              58,
+              50,
+              52,
+              53,
+              52,
+              44,
+              34,
+              100,
+              101,
+              112,
+              111,
+              115,
+              105,
+              116,
+              112,
+              97,
+              105,
+              100,
+              34,
+              58,
+              116,
+              114,
+              117,
+              101,
+              44,
+              34,
+              98,
+              111,
+              111,
+              107,
+              105,
+              110,
+              103,
+              100,
+              97,
+              116,
+              101,
+              115,
+              34,
+              58,
+              123,
+              34,
+              99,
+              104,
+              101,
+              99,
+              107,
+              105,
+              110,
+              34,
+              58,
+              34,
+              50,
+              48,
+              50,
+              54,
+              45,
+              48,
+              50,
+              45,
+              50,
+              52,
+              34,
+              44,
+              34,
+              99,
+              104,
+              101,
+              99,
+              107,
+              111,
+              117,
+              116,
+              34,
+              58,
+              34,
+              50,
+              48,
+              50,
+              54,
+              45,
+              48,
+              50,
+              45,
+              50,
+              56,
+              34,
+              125,
+              44,
+              34,
+              97,
+              100,
+              100,
+              105,
+              116,
+              105,
+              111,
+              110,
+              97,
+              108,
+              110,
+              101,
+              101,
+              100,
+              115,
+              34,
+              58,
+              34,
+              100,
+              105,
+              110,
+              110,
+              101,
+              114,
+              34,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 308,
+          "responseSize": 172
+        },
+        "id": "4b3161cd-4b9b-4eab-815d-18847cd0e20d",
+        "assertions": [
+          {
+            "assertion": "Status code is 200",
+            "skipped": false
+          },
+          {
+            "assertion": "First Name matches iteration data",
+            "skipped": false
+          },
+          {
+            "assertion": "Last Name matches iteration data",
+            "skipped": false
+          },
+          {
+            "assertion": "Total Price matches iteration data",
+            "skipped": false
+          },
+          {
+            "assertion": "Deposit Paid matches iteration data",
+            "skipped": false
+          },
+          {
+            "assertion": "Check-in date matches iteration data",
+            "skipped": false
+          },
+          {
+            "assertion": "Check-out date matches iteration data",
+            "skipped": false
+          },
+          {
+            "assertion": "Additional Needs matches iteration data",
+            "skipped": false
+          }
+        ]
+      }
+    ],
+    "transfers": {
+      "responseTotal": 374
+    },
+    "failures": [
+      {
+        "error": {
+          "name": "AssertionError",
+          "index": 1,
+          "test": "Response time is less than 200ms",
+          "message": "expected 2024 to be below 200",
+          "stack": "AssertionError: expected 2024 to be below 200\n   at Object.eval sandbox-script.js:2:1)",
+          "checksum": "d6a4d71a93f812181b719e1940a9bfae",
+          "id": "579e7342-4419-4913-a323-9c512482df7b",
+          "timestamp": 1770200140341,
+          "stacktrace": [
+            {
+              "fileName": "sandbox-script.js",
+              "lineNumber": 2,
+              "functionName": "Object.eval",
+              "typeName": "Object",
+              "methodName": "eval",
+              "columnNumber": 1,
+              "native": false
+            }
+          ]
+        },
+        "at": "assertion:1 in test-script",
+        "source": {
+          "id": "776370bc-e152-49ce-b911-af804ddecfd9",
+          "name": "Create booking",
+          "request": {
+            "url": {
+              "protocol": "https",
+              "path": [
+                "booking"
+              ],
+              "host": [
+                "restful-booker",
+                "herokuapp",
+                "com"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstname\": \"{{firstname}}\",\r\n  \"lastname\": \"{{lastname}}\",\r\n  \"totalprice\": \"{{totalprice}}\",\r\n  \"depositpaid\": {{depositpaid_bool}},\r\n  \"bookingdates\": {\r\n    \"checkin\": \"{{checkin}}\",\r\n    \"checkout\": \"{{checkout}}\"\r\n  },\r\n  \"additionalneeds\": \"{{additionalneeds}}\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "type": "string",
+                  "value": "{{token}}",
+                  "key": "token"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "dd93c1d9-2612-4885-94ba-1f429d58c169",
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "// Parse JSON response",
+                  "const json = pm.response.json();",
+                  "console.log(json)",
+                  "",
+                  "pm.environment.set(\"id\", json.bookingid); // store booking id for future requests",
+                  "console.log(\"booking id \"+json.bookingid)",
+                  "",
+                  "// Test status code",
+                  "pm.test(\"Status code is 200 for valid token\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "",
+                  "});",
+                  "",
+                  "// Verify the response time",
+                  "pm.test(\"Response time is less than 200ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(200);",
+                  "});",
+                  "",
+                  "// No authentication errors",
+                  "pm.test(\"No Authentication error\", () => {",
+                  "    pm.expect(pm.response.code).to.not.be.oneOf([401, 403]);",
+                  "});",
+                  "",
+                  "// Verify response body is not null",
+                  "pm.test(\"Response contains expected data\", () => {",
+                  "    pm.expect(json).to.not.be.null;",
+                  "});",
+                  "",
+                  "// Booking ID",
+                  "pm.test(\"Booking ID is present\", function () {",
+                  "    pm.expect(json.bookingid).to.not.be.null;",
+                  "});",
+                  "",
+                  "// First Name",
+                  "pm.test(\"First Name is correct\", function () {",
+                  "    pm.expect(json.booking.firstname).to.eql(pm.iterationData.get(\"firstname\"));",
+                  "});",
+                  "",
+                  "// Last Name",
+                  "pm.test(\"Last Name is correct\", function () {",
+                  "    pm.expect(json.booking.lastname).to.eql(pm.iterationData.get(\"lastname\"));",
+                  "});",
+                  "",
+                  "// Total Price",
+                  "pm.test(\"Total Price is correct\", function () {",
+                  "    pm.expect(json.booking.totalprice).to.eql(pm.iterationData.get(\"totalprice\"));",
+                  "});",
+                  "",
+                  "// Deposit Paid",
+                  "pm.test(\"Deposit Paid is correct\", function () {",
+                  "    const depositePaid = pm.iterationData.get(\"depositpaid\"); // store the csv data in a variable",
+                  "    const expectedDeposit = String(depositePaid).trim().toLowerCase() === 'true'; // convert the string to a boolean",
+                  "",
+                  "    console.log(\"Before convert the csv data type : \"+typeof(depositePaid) + \" value: \" + depositePaid)",
+                  "    console.log(\"After convert the csv data type : \"+typeof(expectedDeposit) + \" value: \" + expectedDeposit)",
+                  "    console.log(\"Response depositePaid data type : \"+typeof(json.booking.depositpaid) + \" value: \" + json.booking.depositpaid)",
+                  "",
+                  "    console.log(",
+                  "            \"CSV raw value 👉 [\" + depositePaid + \"]\",",
+                  "            \"length:\", String(depositePaid).length",
+                  "    );",
+                  "",
+                  "    pm.expect(json.booking.depositpaid).to.eql(expectedDeposit);",
+                  "  ",
+                  "});",
+                  "",
+                  "// Booking Check-in Date",
+                  "pm.test(\"Booking Check-in Date is correct\", function () {",
+                  "    pm.expect(json.booking.bookingdates.checkin).to.eql(pm.iterationData.get(\"checkin\"));",
+                  "});",
+                  "",
+                  "// Booking Check-out Date",
+                  "pm.test(\"Booking Check-out Date is correct\", function () {",
+                  "    pm.expect(json.booking.bookingdates.checkout).to.eql(pm.iterationData.get(\"checkout\"));",
+                  "});",
+                  "",
+                  "// Additional Needs",
+                  "pm.test(\"Additional Needs is correct\", () => {",
+                  "    pm.expect(json.booking.additionalneeds).to.eql(pm.iterationData.get(\"additionalneeds\"));",
+                  "});",
+                  "",
+                  "// Headers",
+                  "pm.test(\"Response has required headers\", () => {",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.eql(\"application/json; charset=utf-8\");",
+                  "    pm.response.to.have.header(\"Date\");",
+                  "});",
+                  "",
+                  "// Authorization check",
+                  "pm.test(\"Authorization is successful\", () => {",
+                  "    const responseToken = pm.environment.get(\"token\");",
+                  "    pm.expect(responseToken).to.not.be.undefined;",
+                  "});",
+                  "",
+                  "",
+                  "// console.log(\"Status:\", pm.response.code);",
+                  "// console.log(\"Raw response:\", pm.response.text());",
+                  ""
+                ],
+                "_lastExecutionId": "6fe5378d-ab70-498e-88c6-b69863bc09be"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "3b3d0d3a-607c-491d-92ce-0f910e389508",
+                "type": "text/javascript",
+                "packages": {},
+                "exec": [
+                  "// const csvData = {\r",
+                  "//     firstname: pm.iterationData.get(\"First_Name\"),\r",
+                  "//     lastname: pm.iterationData.get(\"Last_Name\"),\r",
+                  "//     totalprice: pm.iterationData.get(\"Total_Price\"),\r",
+                  "//     depositpaid: pm.iterationData.get(\"depositpaid\"),\r",
+                  "//     checkin: pm.iterationData.get(\"checkin_date\"),\r",
+                  "//     checkout: pm.iterationData.get(\"checkOut_date\"),\r",
+                  "//     additionalneeds: pm.iterationData.get(\"Additional_Needs\")\r",
+                  "// };\r",
+                  "\r",
+                  "// console.log(\"pre\"+csvData)\r",
+                  "// pm.environment.set(\"firstname\", csvData.firstname);\r",
+                  "// pm.environment.set(\"lastname\", csvData.lastname);\r",
+                  "// pm.environment.set(\"totalprice\", csvData.totalprice);\r",
+                  "// pm.environment.set(\"depositpaid\", csvData.depositpaid);\r",
+                  "// pm.environment.set(\"checkin\", csvData.checkin);\r",
+                  "// pm.environment.set(\"checkout\", csvData.checkout);\r",
+                  "// pm.environment.set(\"additionalneeds\", csvData.additionalneeds);\r",
+                  "\r",
+                  "console.log(\"Before Booking api execute the Token is : \" + pm.environment.get(\"token\"));\r",
+                  "\r",
+                  "let raw = pm.iterationData.get(\"depositpaid\");\r",
+                  "\r",
+                  "// fallback protection (VERY important for Newman)\r",
+                  "if (raw === undefined || raw === null === \"\") {\r",
+                  "    raw = false;\r",
+                  "}\r",
+                  "\r",
+                  "const depositpaid_bool =\r",
+                  "    String(raw).toLowerCase() === \"true\";\r",
+                  "\r",
+                  "pm.variables.set(\"depositpaid_bool\", depositpaid_bool);\r",
+                  "\r",
+                  "console.log(\"depositpaid_bool =\", depositpaid_bool);\r",
+                  "\r",
+                  "\r",
+                  "console.log(\"Final request body:\");\r",
+                  "console.log(pm.request.body.raw);\r",
+                  ""
+                ],
+                "_lastExecutionId": "6aaca326-e31e-4b28-ac3b-8e0fa6949edf"
+              }
+            }
+          ]
+        },
+        "parent": {
+          "id": "02033de4-3e8e-4331-9f9d-a11c6ab32fca",
+          "name": "booking",
+          "item": [
+            {
+              "id": "776370bc-e152-49ce-b911-af804ddecfd9",
+              "name": "Create booking",
+              "request": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "booking"
+                  ],
+                  "host": [
+                    "restful-booker",
+                    "herokuapp",
+                    "com"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"firstname\": \"{{firstname}}\",\r\n  \"lastname\": \"{{lastname}}\",\r\n  \"totalprice\": \"{{totalprice}}\",\r\n  \"depositpaid\": {{depositpaid_bool}},\r\n  \"bookingdates\": {\r\n    \"checkin\": \"{{checkin}}\",\r\n    \"checkout\": \"{{checkout}}\"\r\n  },\r\n  \"additionalneeds\": \"{{additionalneeds}}\"\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "type": "string",
+                      "value": "{{token}}",
+                      "key": "token"
+                    }
+                  ]
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "id": "dd93c1d9-2612-4885-94ba-1f429d58c169",
+                    "type": "text/javascript",
+                    "packages": {},
+                    "exec": [
+                      "// Parse JSON response",
+                      "const json = pm.response.json();",
+                      "console.log(json)",
+                      "",
+                      "pm.environment.set(\"id\", json.bookingid); // store booking id for future requests",
+                      "console.log(\"booking id \"+json.bookingid)",
+                      "",
+                      "// Test status code",
+                      "pm.test(\"Status code is 200 for valid token\", function() {",
+                      "    pm.response.to.have.status(200);",
+                      "",
+                      "});",
+                      "",
+                      "// Verify the response time",
+                      "pm.test(\"Response time is less than 200ms\", function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(200);",
+                      "});",
+                      "",
+                      "// No authentication errors",
+                      "pm.test(\"No Authentication error\", () => {",
+                      "    pm.expect(pm.response.code).to.not.be.oneOf([401, 403]);",
+                      "});",
+                      "",
+                      "// Verify response body is not null",
+                      "pm.test(\"Response contains expected data\", () => {",
+                      "    pm.expect(json).to.not.be.null;",
+                      "});",
+                      "",
+                      "// Booking ID",
+                      "pm.test(\"Booking ID is present\", function () {",
+                      "    pm.expect(json.bookingid).to.not.be.null;",
+                      "});",
+                      "",
+                      "// First Name",
+                      "pm.test(\"First Name is correct\", function () {",
+                      "    pm.expect(json.booking.firstname).to.eql(pm.iterationData.get(\"firstname\"));",
+                      "});",
+                      "",
+                      "// Last Name",
+                      "pm.test(\"Last Name is correct\", function () {",
+                      "    pm.expect(json.booking.lastname).to.eql(pm.iterationData.get(\"lastname\"));",
+                      "});",
+                      "",
+                      "// Total Price",
+                      "pm.test(\"Total Price is correct\", function () {",
+                      "    pm.expect(json.booking.totalprice).to.eql(pm.iterationData.get(\"totalprice\"));",
+                      "});",
+                      "",
+                      "// Deposit Paid",
+                      "pm.test(\"Deposit Paid is correct\", function () {",
+                      "    const depositePaid = pm.iterationData.get(\"depositpaid\"); // store the csv data in a variable",
+                      "    const expectedDeposit = String(depositePaid).trim().toLowerCase() === 'true'; // convert the string to a boolean",
+                      "",
+                      "    console.log(\"Before convert the csv data type : \"+typeof(depositePaid) + \" value: \" + depositePaid)",
+                      "    console.log(\"After convert the csv data type : \"+typeof(expectedDeposit) + \" value: \" + expectedDeposit)",
+                      "    console.log(\"Response depositePaid data type : \"+typeof(json.booking.depositpaid) + \" value: \" + json.booking.depositpaid)",
+                      "",
+                      "    console.log(",
+                      "            \"CSV raw value 👉 [\" + depositePaid + \"]\",",
+                      "            \"length:\", String(depositePaid).length",
+                      "    );",
+                      "",
+                      "    pm.expect(json.booking.depositpaid).to.eql(expectedDeposit);",
+                      "  ",
+                      "});",
+                      "",
+                      "// Booking Check-in Date",
+                      "pm.test(\"Booking Check-in Date is correct\", function () {",
+                      "    pm.expect(json.booking.bookingdates.checkin).to.eql(pm.iterationData.get(\"checkin\"));",
+                      "});",
+                      "",
+                      "// Booking Check-out Date",
+                      "pm.test(\"Booking Check-out Date is correct\", function () {",
+                      "    pm.expect(json.booking.bookingdates.checkout).to.eql(pm.iterationData.get(\"checkout\"));",
+                      "});",
+                      "",
+                      "// Additional Needs",
+                      "pm.test(\"Additional Needs is correct\", () => {",
+                      "    pm.expect(json.booking.additionalneeds).to.eql(pm.iterationData.get(\"additionalneeds\"));",
+                      "});",
+                      "",
+                      "// Headers",
+                      "pm.test(\"Response has required headers\", () => {",
+                      "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.eql(\"application/json; charset=utf-8\");",
+                      "    pm.response.to.have.header(\"Date\");",
+                      "});",
+                      "",
+                      "// Authorization check",
+                      "pm.test(\"Authorization is successful\", () => {",
+                      "    const responseToken = pm.environment.get(\"token\");",
+                      "    pm.expect(responseToken).to.not.be.undefined;",
+                      "});",
+                      "",
+                      "",
+                      "// console.log(\"Status:\", pm.response.code);",
+                      "// console.log(\"Raw response:\", pm.response.text());",
+                      ""
+                    ],
+                    "_lastExecutionId": "6fe5378d-ab70-498e-88c6-b69863bc09be"
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "id": "3b3d0d3a-607c-491d-92ce-0f910e389508",
+                    "type": "text/javascript",
+                    "packages": {},
+                    "exec": [
+                      "// const csvData = {\r",
+                      "//     firstname: pm.iterationData.get(\"First_Name\"),\r",
+                      "//     lastname: pm.iterationData.get(\"Last_Name\"),\r",
+                      "//     totalprice: pm.iterationData.get(\"Total_Price\"),\r",
+                      "//     depositpaid: pm.iterationData.get(\"depositpaid\"),\r",
+                      "//     checkin: pm.iterationData.get(\"checkin_date\"),\r",
+                      "//     checkout: pm.iterationData.get(\"checkOut_date\"),\r",
+                      "//     additionalneeds: pm.iterationData.get(\"Additional_Needs\")\r",
+                      "// };\r",
+                      "\r",
+                      "// console.log(\"pre\"+csvData)\r",
+                      "// pm.environment.set(\"firstname\", csvData.firstname);\r",
+                      "// pm.environment.set(\"lastname\", csvData.lastname);\r",
+                      "// pm.environment.set(\"totalprice\", csvData.totalprice);\r",
+                      "// pm.environment.set(\"depositpaid\", csvData.depositpaid);\r",
+                      "// pm.environment.set(\"checkin\", csvData.checkin);\r",
+                      "// pm.environment.set(\"checkout\", csvData.checkout);\r",
+                      "// pm.environment.set(\"additionalneeds\", csvData.additionalneeds);\r",
+                      "\r",
+                      "console.log(\"Before Booking api execute the Token is : \" + pm.environment.get(\"token\"));\r",
+                      "\r",
+                      "let raw = pm.iterationData.get(\"depositpaid\");\r",
+                      "\r",
+                      "// fallback protection (VERY important for Newman)\r",
+                      "if (raw === undefined || raw === null === \"\") {\r",
+                      "    raw = false;\r",
+                      "}\r",
+                      "\r",
+                      "const depositpaid_bool =\r",
+                      "    String(raw).toLowerCase() === \"true\";\r",
+                      "\r",
+                      "pm.variables.set(\"depositpaid_bool\", depositpaid_bool);\r",
+                      "\r",
+                      "console.log(\"depositpaid_bool =\", depositpaid_bool);\r",
+                      "\r",
+                      "\r",
+                      "console.log(\"Final request body:\");\r",
+                      "console.log(pm.request.body.raw);\r",
+                      ""
+                    ],
+                    "_lastExecutionId": "6aaca326-e31e-4b28-ac3b-8e0fa6949edf"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "4b3161cd-4b9b-4eab-815d-18847cd0e20d",
+              "name": "Update Booking",
+              "request": {
+                "url": {
+                  "protocol": "https",
+                  "path": [
+                    "booking",
+                    "{{id}}"
+                  ],
+                  "host": [
+                    "restful-booker",
+                    "herokuapp",
+                    "com"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "token={{token}}"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"firstname\": \"{{update_firstname}}\",\r\n  \"lastname\": \"{{update_lastname}}\",\r\n  \"totalprice\": \"{{update_totalprice}}\",\r\n  \"depositpaid\": {{depositpaid_bool}},\r\n  \"bookingdates\": {\r\n    \"checkin\": \"{{update_checkin}}\",\r\n    \"checkout\": \"{{update_checkout}}\"\r\n  },\r\n  \"additionalneeds\": \"{{update_additionalneeds}}\"\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "id": "3c61ea16-e0ae-465b-bde7-9f050c5a4328",
+                    "type": "text/javascript",
+                    "packages": {},
+                    "exec": [
+                      "var statusCode = pm.response.code;\r",
+                      "console.log(statusCode);\r",
+                      "\r",
+                      "var jsonBody = pm.response.json(); // parse response JSON\r",
+                      "\r",
+                      "if (statusCode === 200) {\r",
+                      "\r",
+                      "    pm.test(\"Status code is 200\", function () {\r",
+                      "        pm.response.to.have.status(200);\r",
+                      "    });\r",
+                      "\r",
+                      "    pm.test(\"First Name matches iteration data\", function () {\r",
+                      "        pm.expect(jsonBody.firstname).to.eql(pm.iterationData.get(\"update_firstname\"));\r",
+                      "    });\r",
+                      "\r",
+                      "    pm.test(\"Last Name matches iteration data\", function () {\r",
+                      "        pm.expect(jsonBody.lastname).to.eql(pm.iterationData.get(\"update_lastname\"));\r",
+                      "    });\r",
+                      "\r",
+                      "    pm.test(\"Total Price matches iteration data\", function () {\r",
+                      "        pm.expect(jsonBody.totalprice).to.eql(pm.iterationData.get(\"update_totalprice\"));\r",
+                      "    });\r",
+                      "\r",
+                      "    pm.test(\"Deposit Paid matches iteration data\", function () {\r",
+                      "\r",
+                      "        const depositePaid = pm.iterationData.get(\"update_depositpaid\"); // store the csv data in a variable\r",
+                      "        const expectedDeposit = String(depositePaid).trim().toLowerCase() === 'true'; // convert the string to a boolean\r",
+                      "\r",
+                      "        console.log(\"Before convert the csv data type : \"+typeof(depositePaid) + \" value: \" + depositePaid)\r",
+                      "        console.log(\"After convert the csv data type : \"+typeof(expectedDeposit) + \" value: \" + expectedDeposit)\r",
+                      "        console.log(\"Response depositePaid data type : \"+typeof(jsonBody.depositpaid) + \" value: \" + jsonBody.depositpaid)\r",
+                      "\r",
+                      "        console.log(\r",
+                      "                \"CSV raw value 👉 [\" + depositePaid + \"]\",\r",
+                      "                \"length:\", String(depositePaid).length\r",
+                      "        );\r",
+                      "\r",
+                      "        pm.expect(jsonBody.depositpaid).to.eql(expectedDeposit);\r",
+                      "    \r",
+                      "    });\r",
+                      "\r",
+                      "    pm.test(\"Check-in date matches iteration data\", function () {\r",
+                      "        pm.expect(jsonBody.bookingdates.checkin).to.eql(pm.iterationData.get(\"update_checkin\"));\r",
+                      "    });\r",
+                      "\r",
+                      "    pm.test(\"Check-out date matches iteration data\", function () {\r",
+                      "        pm.expect(jsonBody.bookingdates.checkout).to.eql(pm.iterationData.get(\"update_checkout\"));\r",
+                      "    });\r",
+                      "\r",
+                      "    pm.test(\"Additional Needs matches iteration data\", function () {\r",
+                      "        pm.expect(jsonBody.additionalneeds).to.eql(pm.iterationData.get(\"update_additionalneeds\"));\r",
+                      "    });\r",
+                      "\r",
+                      "} else {\r",
+                      "    pm.test(\"Status code is \" + statusCode, function () {\r",
+                      "        pm.response.to.have.status(statusCode);\r",
+                      "    });\r",
+                      "}\r",
+                      ""
+                    ],
+                    "_lastExecutionId": "ca6d6032-41f7-4994-a773-5fb0a2c1a06a"
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "id": "b7be445d-afb3-45cb-92fc-508dcc53dd3d",
+                    "type": "text/javascript",
+                    "packages": {},
+                    "exec": [
+                      "// var firsname = pm.variables.replaceIn('{{$randomFirstName}}');\r",
+                      "// console.log(\"first name:\"+firsname)\r",
+                      "// pm.environment.set(\"First_Name\", firsname);\r",
+                      "\r",
+                      "// // set random lastname to envrionment.\r",
+                      "\r",
+                      "// var lastname = pm.variables.replaceIn('{{$randomLastName}}');\r",
+                      "// console.log(\"Last name: \"+lastname)\r",
+                      "// pm.environment.set(\"Last_Name\", lastname);\r",
+                      "\r",
+                      "\r",
+                      "console.log(\"Before Booking api execute the Token is : \" + pm.environment.get(\"token\"));\r",
+                      "console.log(\"Booking id: \"+pm.environment.get('id'))\r",
+                      "\r",
+                      "let raw = pm.iterationData.get(\"update_depositpaid\");\r",
+                      "\r",
+                      "// fallback protection (VERY important for Newman)\r",
+                      "if (raw === undefined || raw === null === \"\") {\r",
+                      "    raw = false;\r",
+                      "}\r",
+                      "\r",
+                      "const depositpaid_bool =\r",
+                      "    String(raw).toLowerCase() === \"true\";\r",
+                      "\r",
+                      "pm.variables.set(\"depositpaid_bool\", depositpaid_bool);\r",
+                      "\r",
+                      "console.log(\"depositpaid_bool =\", depositpaid_bool);\r",
+                      "\r",
+                      "\r",
+                      "console.log(\"Final request body:\");\r",
+                      "console.log(pm.request.body.raw);\r",
+                      "\r",
+                      "console.log(\"Token:\", pm.environment.get(\"token\"));\r",
+                      "console.log(\"BookingId:\", pm.environment.get(\"id\"));\r",
+                      "\r",
+                      "\r",
+                      "if (!pm.environment.get(\"token\")) {\r",
+                      "    \r",
+                      "    throw new Error(\"Token missing! Forbidden will occur.\");\r",
+                      "}\r",
+                      "if (!pm.environment.get(\"id\")) {\r",
+                      "    throw new Error(\"BookingId missing! Run Create first.\");\r",
+                      "}\r",
+                      ""
+                    ],
+                    "_lastExecutionId": "5010d313-8b16-437b-98db-80e9585d6981"
+                  }
+                }
+              ]
+            }
+          ],
+          "event": []
+        },
+        "cursor": {
+          "position": 0,
+          "iteration": 0,
+          "length": 2,
+          "cycles": 1,
+          "empty": false,
+          "eof": false,
+          "bof": true,
+          "cr": false,
+          "ref": "680496dc-8f36-4e96-85d1-dbf730c259c6",
+          "httpRequestId": "21e9a3fc-1478-4a82-897b-62361a3ef450",
+          "scriptId": "dd93c1d9-2612-4885-94ba-1f429d58c169",
+          "execution": "6fe5378d-ab70-498e-88c6-b69863bc09be"
+        }
+      }
+    ],
+    "error": null
+  }
+}

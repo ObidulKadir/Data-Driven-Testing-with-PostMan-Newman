@@ -1,0 +1,2 @@
+firstname,lastname,totalprice,depositpaid,checkin,checkout,additionalneeds,update_firstname,update_lastname,update_totalprice,update_depositpaid,update_checkin,update_checkout,update_additionalneeds
+Kadir,Habibi,1900,FALSE,2026-02-23,2026-02-25,Breakfast,Shayan,Sulantan,2454,TRUE,2026-02-24,2026-02-28,dinner
